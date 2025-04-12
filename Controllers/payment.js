@@ -60,14 +60,27 @@ export const verify = async (req, res) => {
 
 //! user specificOrder
 export const userOrder = async (req, res) => {
-  let userId = req.user._id.toString();
-  //console.log(userId);
-  let orders = await Payment.find({ userId: userId }).sort({ orderDate: -1 });
-  res.json(orders);
+  try {
+  const userId = req.user._id.toString();
+    const orders = await Payment.find({ userId })
+      .select("orderDate items total")
+      .sort({ orderDate: -1 });
+
+    res.json(orders);
+  } catch (error) {
+    console.error("Error fetching user orders:", error);
+    res.status(500).json({ message: "Server error fetching orders" });
+  }
 };
+
 
 //! user AllOrders
 export const allOrders = async (req, res) => {
-  let orders = await Payment.find().sort({ orderDate: -1 });
-  res.json(orders);
+  try {
+    const userId = req.body.userId;
+    const orders = await Payment.find({ userId }).sort({ orderDate: -1 });
+    res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
